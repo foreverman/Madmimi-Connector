@@ -1,0 +1,27 @@
+#! /usr/bin/env ruby
+RAILS_ENV = ARGV[1] || ENV["RAILS_ENV"] || "development"
+
+require File.dirname(__FILE__) + "/../config/environment.rb"
+
+class Scheduler < SimpleDaemon::Base
+  SimpleDaemon::WORKING_DIRECTORY = "#{RAILS_ROOT}/log"
+  def self.start
+    puts "starts scheduler.........."
+    scheduler = Rufus::Scheduler.start_new
+    logger = RAILS_DEFAULT_LOGGER
+    
+    scheduler.every '30s' do
+			puts "scheduled................"
+      MadmimiConnector.perform
+    end
+
+
+    scheduler.join
+  end
+
+  def self.stop
+    puts "stop the daemon"
+  end
+
+end
+Scheduler.daemonize
